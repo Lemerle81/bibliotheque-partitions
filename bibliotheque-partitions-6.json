@@ -1,0 +1,50 @@
+{
+  "pieces": [
+    {
+      "id": "p-1785084164436",
+      "titre": "Hine e Hin",
+      "compositeur": "Princess Te Rangi Pai",
+      "arrangeur": "P.Graham",
+      "style": "Hymne",
+      "niveau": 2,
+      "dates": [
+        "12/26"
+      ],
+      "pdf": "Hime eHine Princess te rangi pai arr. peter Graham.pdf",
+      "pdfDirection": "direction-hine-e-hine.pdf",
+      "audio": "Hine e hine.mp3",
+      "duree": "3:20"
+    },
+    {
+      "id": "p-1785430976307",
+      "titre": "Crimson Tide",
+      "compositeur": "Hanz Zimmer&Nick Gennie",
+      "arrangeur": "Klaas van der Woud",
+      "style": "Film",
+      "niveau": 2,
+      "dates": [
+        "12/26"
+      ],
+      "pdf": "crimson-tide - parts.pdf",
+      "pdfDirection": "crimson tide d.pdf",
+      "audio": "Crimson tide.mp3",
+      "duree": "4:30"
+    },
+    {
+      "id": "p-1785438519593",
+      "titre": "Diavolezza",
+      "compositeur": "Adolf Kunzle",
+      "arrangeur": "",
+      "style": "Marche",
+      "niveau": 2,
+      "dates": [
+        "04/27"
+      ],
+      "pdf": "Diavolezza P.pdf",
+      "pdfDirection": "Diavolezza d.pdf",
+      "audio": "Diavolezza.mp3",
+      "duree": "2:45"
+    }
+  ],
+  "concerts": []
+}

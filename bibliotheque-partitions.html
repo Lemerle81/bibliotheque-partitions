@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Écho du Vanil Noir — Bibliothèque des partitions</title>
+<style>
+  :root{
+    --ink:#1C232B;
+    --stone:#3A4550;
+    --stone-line: rgba(255,255,255,0.09);
+    --brass:#B8863B;
+    --brass-light:#D9A85C;
+    --parchment:#F3EDE0;
+    --parchment-line:#DED0AE;
+    --text-dark:#241C10;
+    --text-mute:#7A6E56;
+    --green:#5E7A55;
+    --amber:#B8863B;
+    --red:#A15A3E;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--ink);
+    color: var(--text-dark);
+    font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+    min-height:100vh;
+  }
+  ::selection{ background: var(--brass-light); color:#1C232B; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    background: linear-gradient(180deg, #141A20 0%, #1C232B 60%, #232B33 100%);
+    padding: 64px 24px 48px;
+    text-align:center;
+    border-bottom: 1px solid var(--stone-line);
+  }
+  .peaks{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    width:100%; height:180px;
+    opacity:0.9;
+  }
+  .echo-ring{
+    fill:none;
+    stroke: var(--brass);
+    stroke-width:1;
+    opacity:0;
+    transform-origin: 50% 100%;
+    animation: echo 6s ease-out infinite;
+  }
+  .echo-ring.r2{ animation-delay: 1.4s; }
+  .echo-ring.r3{ animation-delay: 2.8s; }
+  @keyframes echo{
+    0%{ opacity:0; transform: scale(0.85); }
+    12%{ opacity:0.55; }
+    70%{ opacity:0; }
+    100%{ opacity:0; transform: scale(1.25); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .echo-ring{ animation:none; opacity:0; }
+  }
+  .eyebrow{
+    position:relative;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    font-size:11px;
+    color: var(--brass-light);
+    margin:0 0 14px;
+    font-weight:600;
+  }
+  h1.title{
+    position:relative;
+    font-family: "Big Caslon", "Didot", Georgia, "Iowan Old Style", serif;
+    font-weight: 500;
+    font-size: clamp(32px, 5.4vw, 58px);
+    color:#F3EDE0;
+    margin:0;
+    letter-spacing:.01em;
+  }
+  .subtitle{
+    position:relative;
+    margin:14px auto 0;
+    max-width:520px;
+    color:#B7ADA0;
+    font-size:15px;
+    line-height:1.5;
+  }
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar{
+    position: sticky;
+    top:0;
+    z-index:20;
+    background: var(--ink);
+    border-bottom:1px solid var(--stone-line);
+    padding:16px 24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+  .toolbar input[type="text"], .toolbar select{
+    background: var(--stone);
+    border:1px solid var(--stone-line);
+    color:#F3EDE0;
+    border-radius:6px;
+    padding:9px 12px;
+    font-size:13px;
+    font-family:inherit;
+  }
+  .toolbar input[type="text"]::placeholder{ color:#8E97A2; }
+  .toolbar input[type="text"]{ min-width:220px; flex:1 1 220px; }
+  .toolbar select{ cursor:pointer; }
+  .spacer{ flex:1 1 auto; }
+  .btn{
+    border:none;
+    border-radius:6px;
+    padding:9px 16px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+    transition: transform .08s ease, filter .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn-brass{ background: var(--brass); color:#1C232B; }
+  .btn-brass:hover{ filter:brightness(1.1); }
+  .btn-ghost{ background:transparent; border:1px solid var(--stone-line); color:#D9D2C4; }
+  .btn-load{
+    background: rgba(184,134,59,0.15);
+    border:1px solid var(--brass);
+    color: var(--brass-light);
+    font-weight:700;
+    padding:9px 16px;
+    font-size:13px;
+  }
+  .btn-load:hover{ background: rgba(184,134,59,0.28); }
+  #btnExport{
+    background:transparent; border:1px solid var(--stone-line); color:#D9D2C4;
+    padding:9px 16px; font-size:13px; border-radius:6px; cursor:pointer; font-family:inherit; font-weight:600;
+  }
+  #btnExport.btn-unsaved{
+    background: rgba(161,90,62,0.18);
+    border-color:#A15A3E;
+    color:#F2B8A3;
+    animation: pulse-unsaved 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse-unsaved{
+    0%, 100% { box-shadow: 0 0 0 0 rgba(161,90,62,0.35); }
+    50% { box-shadow: 0 0 0 5px rgba(161,90,62,0); }
+  }
+  .btn-ghost:hover{ border-color: var(--brass); color: var(--brass-light); }
+  .btn-small{ padding:6px 11px; font-size:12px; }
+  input[type="file"]{ display:none; }
+
+  /* ---------- GRID ---------- */
+  main{ padding: 32px 24px 80px; max-width:1180px; margin:0 auto; }
+  .count-line{
+    color:#9A9280;
+    font-size:12px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin: 4px 4px 18px;
+  }
+  .stats-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin: 4px 4px 20px;
+  }
+  .stat-chip{
+    background: var(--stone);
+    border:1px solid var(--stone-line);
+    border-radius:8px;
+    padding:10px 16px;
+    min-width:120px;
+  }
+  .stat-chip .num{
+    font-family:"Big Caslon","Didot",Georgia,serif;
+    font-size:22px;
+    color:#F3EDE0;
+    line-height:1.1;
+  }
+  .stat-chip .lbl{
+    font-size:11px;
+    color:#9A9280;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    margin-top:2px;
+  }
+  .duration-badge{
+    font-size:11px;
+    font-weight:700;
+    color: var(--text-mute);
+    font-variant-numeric: tabular-nums;
+  }
+  .select-check{
+    display:flex;
+    align-items:center;
+    cursor:pointer;
+  }
+  .select-check input{
+    width:17px; height:17px; cursor:pointer;
+    accent-color: var(--brass);
+  }
+  .select-check input:disabled{
+    cursor:not-allowed;
+    opacity:.35;
+  }
+
+  /* ---------- TABS ---------- */
+  .tabs{
+    display:flex; gap:4px; padding:14px 24px 0;
+    border-bottom:1px solid var(--stone-line);
+  }
+  .tab-btn{
+    background:none; border:none; cursor:pointer;
+    color:#9A9280; font-family:inherit; font-size:13px; font-weight:600;
+    padding:10px 16px; border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{ color:#F3EDE0; border-bottom-color: var(--brass); }
+  .tab-btn:hover{ color: var(--brass-light); }
+
+  /* ---------- CONCERT VIEW ---------- */
+  .concert-layout{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:28px;
+  }
+  .concert-heading{
+    font-family:"Big Caslon","Didot",Georgia,serif;
+    font-weight:500; font-size:16px; color:#E7DCC0; margin:0 0 12px;
+  }
+  .concert-total{
+    background: var(--stone);
+    border:1px solid var(--stone-line);
+    border-radius:8px;
+    padding:16px 20px;
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .concert-total-num{
+    font-family:"Big Caslon","Didot",Georgia,serif;
+    font-size:34px; color:#F3EDE0;
+  }
+  .concert-total-lbl{
+    font-size:11px; color:#9A9280; text-transform:uppercase; letter-spacing:.06em; margin-top:2px;
+  }
+  .pick-row{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 10px; border-radius:6px;
+    background: var(--parchment); border:1px solid var(--parchment-line);
+    margin-bottom:6px;
+  }
+  .pick-row label{ flex:1; font-size:13px; color: var(--text-dark); cursor:pointer; }
+  .pick-row .pd{ font-size:11.5px; color: var(--text-mute); font-variant-numeric: tabular-nums; }
+  .pick-row input[type="checkbox"]{ accent-color: var(--brass); width:16px; height:16px; cursor:pointer; }
+  .ord-row{
+    display:flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:6px;
+    background: var(--parchment); border:1px solid var(--parchment-line);
+    margin-bottom:6px;
+  }
+  .ord-row .onum{ color: var(--text-mute); font-size:12px; width:18px; }
+  .ord-row .otitle{ font-family:"Big Caslon","Didot",Georgia,serif; font-size:15px; flex:1; color:var(--text-dark); }
+  .ord-row .odur{ font-size:12px; color: var(--text-mute); font-variant-numeric: tabular-nums; }
+  .ord-btn{
+    background:none; border:none; cursor:pointer; color:#A69A7C;
+    font-size:13px; font-weight:700; padding:2px 5px;
+  }
+  .ord-btn:hover{ color: var(--brass); }
+  .ord-btn.remove:hover{ color:#A15A3E; }
+  .empty-concert{ color:#9A9280; font-size:13px; margin-top:4px; }
+  .concert-manager{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    padding:16px 24px; border-bottom:1px solid var(--stone-line);
+  }
+  .concert-manager select, .concert-manager input[type="text"]{
+    background: var(--stone); border:1px solid var(--stone-line); color:#F3EDE0;
+    border-radius:6px; padding:9px 12px; font-size:13px; font-family:inherit;
+  }
+  .concert-manager input[type="text"]{ min-width:160px; }
+  #noConcertMsg{ padding:0 24px; }
+  @media (max-width: 760px){
+    .concert-layout{ grid-template-columns: 1fr; }
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap:18px;
+  }
+
+  /* ---------- TABLE ---------- */
+  table.lib-table{
+    width:100%;
+    border-collapse:collapse;
+    background: var(--parchment);
+    border:1px solid var(--parchment-line);
+    border-radius:6px;
+    overflow:hidden;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.25), 0 8px 18px -12px rgba(0,0,0,0.6);
+  }
+  table.lib-table th{
+    background: var(--stone);
+    text-align:left;
+    padding:10px 14px;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:#D9D2C4;
+    border-bottom:1px solid var(--stone-line);
+    cursor:pointer;
+    white-space:nowrap;
+    user-select:none;
+  }
+  table.lib-table th:hover{ color: var(--brass-light); }
+  table.lib-table th.sorted{ color: var(--brass-light); }
+  table.lib-table td{
+    padding:10px 14px;
+    border-bottom:1px solid var(--parchment-line);
+    vertical-align:middle;
+    font-size:13px;
+  }
+  table.lib-table tbody tr.main-row{ cursor:pointer; }
+  table.lib-table tbody tr.main-row:hover{ background: rgba(184,134,59,0.08); }
+  table.lib-table tbody tr.detail-row td{ background: rgba(28,35,43,0.03); padding:16px 22px; }
+  .title-cell{ font-family:"Big Caslon","Didot",Georgia,serif; font-size:17px; color: var(--text-dark); }
+  .sub-cell{ color: var(--text-mute); font-size:12px; font-family:-apple-system,sans-serif; margin-top:2px; }
+  .pill{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:4px 9px;
+    border-radius:20px;
+    background:#1C232B;
+    color:#E7DCC0;
+  }
+  .dots{ display:flex; gap:4px; align-items:center; }
+  .dot{
+    width:9px; height:9px; border-radius:50%;
+    background: var(--parchment-line);
+    border:1px solid rgba(0,0,0,0.08);
+  }
+  .dot.on{ background: var(--brass); border-color: var(--brass); }
+  .niveau-word{
+    font-size:10.5px; font-weight:600; color: var(--text-mute);
+    margin-left:4px; text-transform:uppercase; letter-spacing:.03em;
+  }
+  .niveau-tag{ font-size:12.5px; font-weight:700; }
+  .niveau-tag.n1,.niveau-tag.n2{ color:#5E7A55; }
+  .niveau-tag.n3{ color: var(--brass); }
+  .niveau-tag.n4,.niveau-tag.n5{ color:#A15A3E; }
+  .played-badge{ font-size:12px; color: var(--text-mute); font-variant-numeric: tabular-nums; }
+  .dates-line{
+    font-size:11.5px;
+    color: var(--text-mute);
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .date-chip{
+    background: rgba(28,35,43,0.06);
+    border:1px solid var(--parchment-line);
+    padding:2px 7px;
+    border-radius:4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .row-actions{ display:flex; gap:8px; flex-wrap:nowrap; white-space:nowrap; justify-content:flex-end; }
+  .check-cell input{ width:16px; height:16px; cursor:pointer; accent-color: var(--brass); }
+  .check-cell input:disabled{ opacity:.3; cursor:not-allowed; }
+  .detail-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; }
+  .detail-block h4{
+    margin:0 0 8px; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color: var(--text-mute); font-family:-apple-system,sans-serif;
+  }
+  .link-btn{
+    background:none; border:none; cursor:pointer; padding:0; display:block; margin-bottom:6px;
+    font-family:inherit; font-size:12.5px; font-weight:700; color: var(--stone);
+    text-decoration:none; border-bottom:1px solid var(--brass); width:fit-content;
+  }
+  .link-btn:hover{ color: var(--brass); }
+  .pdf-link{
+    font-size:12.5px;
+    font-weight:700;
+    color: var(--stone);
+    text-decoration:none;
+    border-bottom:1px solid var(--brass);
+    padding-bottom:1px;
+  }
+  .pdf-link:hover{ color: var(--brass); }
+  .pdf-link.disabled{ color:#B9AF9C; border-color:#D8CDB4; cursor:default; pointer-events:none; }
+  .icon-btn{
+    background:none; border:none; cursor:pointer;
+    color:#A69A7C; font-size:12px; font-weight:600;
+    padding:2px 4px;
+  }
+  .icon-btn:hover{ color:#A15A3E; }
+
+  .empty{
+    text-align:center;
+    padding:70px 20px;
+    color:#8B8375;
+  }
+  .empty h3{ font-family:"Big Caslon","Didot",Georgia,serif; font-weight:500; color:#E7DCC0; margin-bottom:8px; }
+
+  /* ---------- PANEL ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(10,13,16,0.55);
+    display:none; align-items:center; justify-content:center;
+    z-index:50; padding:20px;
+  }
+  .overlay.open{ display:flex; }
+  .panel{
+    background: var(--parchment);
+    width:100%; max-width:520px;
+    max-height:88vh;
+    overflow-y:auto;
+    border-radius:6px;
+    padding:28px 28px 24px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+  }
+  .panel h2{
+    font-family:"Big Caslon","Didot",Georgia,serif;
+    font-weight:500; font-size:24px; margin:0 0 4px; color: var(--text-dark);
+  }
+  .panel .hint{ font-size:12.5px; color: var(--text-mute); margin-bottom:20px; }
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block; font-size:11px; font-weight:700; letter-spacing:.05em;
+    text-transform:uppercase; color: var(--text-mute); margin-bottom:6px;
+  }
+  .field input[type="text"]{
+    width:100%; padding:9px 11px; border-radius:5px;
+    border:1px solid var(--parchment-line); background:#fff;
+    font-family:inherit; font-size:14px; color: var(--text-dark);
+  }
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .choice-row{ display:flex; flex-wrap:wrap; gap:7px; }
+  .choice{
+    padding:6px 12px; border-radius:20px; font-size:12.5px; font-weight:600;
+    border:1px solid var(--parchment-line); background:#fff; color:var(--text-mute);
+    cursor:pointer;
+  }
+  .choice.sel{ background: var(--ink); color:#E7DCC0; border-color:var(--ink); }
+  .level-row{ display:flex; gap:10px; align-items:center; }
+  .level-dot{
+    width:26px; height:26px; border-radius:50%;
+    border:1px solid var(--parchment-line); background:#fff;
+    cursor:pointer; font-size:12px; font-weight:700; color:var(--text-mute);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .level-dot.sel{ background: var(--brass); border-color: var(--brass); color:#1C232B; }
+  .dates-input-row{ display:flex; gap:8px; }
+  .dates-input-row input{ flex:1; }
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .chip{
+    background:#fff; border:1px solid var(--parchment-line); border-radius:5px;
+    padding:4px 8px; font-size:12px; display:flex; align-items:center; gap:6px;
+  }
+  .chip button{ background:none; border:none; cursor:pointer; color:#A15A3E; font-weight:700; }
+  .panel-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+
+  footer.note{
+    text-align:center; padding:22px 20px 40px; color:#726A5C; font-size:12px;
+    max-width:640px; margin:0 auto;
+  }
+  footer.note a{ color: var(--brass-light); }
+
+  @media (max-width: 520px){
+    .two-col{ grid-template-columns:1fr; }
+    .hero{ padding:48px 18px 40px; }
+  }
+</style>
+</head>
+<body>
+
+  <button id="btnHelp" title="Comment ça marche ?" style="position:fixed; top:16px; left:16px; z-index:60; background: var(--brass); color:#1C232B; border:none; border-radius:999px; width:40px; height:40px; font-size:16px; font-weight:800; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.35);">?</button>
+
+  <header class="hero">
+    <svg class="peaks" viewBox="0 0 1200 180" preserveAspectRatio="none" aria-hidden="true">
+      <circle class="echo-ring r1" cx="600" cy="180" r="60"/>
+      <circle class="echo-ring r2" cx="600" cy="180" r="110"/>
+      <circle class="echo-ring r3" cx="600" cy="180" r="170"/>
+      <polygon points="0,180 0,120 140,40 260,110 400,20 560,95 680,10 820,100 960,45 1080,115 1200,70 1200,180" fill="#232B33"/>
+      <polygon points="0,180 0,150 180,80 340,140 520,60 700,130 880,55 1040,120 1200,90 1200,180" fill="#1A2027"/>
+    </svg>
+    <p class="eyebrow">Grandvillard · Fribourg</p>
+    <h1 class="title">L'Écho du Vanil Noir</h1>
+    <p class="subtitle">Bibliothèque des partitions de la fanfare — classée, filtrable, et toujours prête à jouer, même sans connexion.</p>
+  </header>
+
+  <div class="toolbar">
+    <div id="loadReminder" style="width:100%; background:#3A2A0F; border:1px solid var(--brass); color:#F3EDE0; border-radius:6px; padding:10px 14px; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <span>Tu rouvres cette page ? Clique sur <b>« Charger un fichier »</b> et choisis ton dernier <code>.json</code> enregistré pour retrouver ta bibliothèque.</span>
+      <button class="icon-btn" id="dismissReminder" style="color:#D9A85C;">Fermer ×</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabLibrary">Bibliothèque</button>
+    <button class="tab-btn" id="tabConcert">Programme de concert</button>
+  </div>
+
+  <div class="toolbar" id="libraryToolbar">
+    <input type="text" id="search" placeholder="Rechercher un titre, un compositeur…">
+    <select id="filterStyle">
+      <option value="">Tous les styles</option>
+    </select>
+    <select id="filterNiveau">
+      <option value="">Tous les niveaux</option>
+      <option value="1">Niveau 1</option>
+      <option value="2">Niveau 2</option>
+      <option value="3">Niveau 3</option>
+      <option value="4">Niveau 4</option>
+      <option value="5">Niveau 5</option>
+    </select>
+    <div class="spacer"></div>
+    <select id="concertActiveSelect"><option value="">Aucun concert actif</option></select>
+    <button class="btn btn-ghost btn-small" id="btnNewConcertQuick">+ Concert</button>
+    <button class="btn btn-load" id="btnImport">↓ Charger un fichier</button>
+    <input type="file" id="fileInput" accept="application/json">
+    <button class="btn btn-ghost btn-small" id="btnExport">Enregistrer</button>
+    <button class="btn btn-brass" id="btnAdd">+ Nouvelle partition</button>
+  </div>
+
+  <main id="libraryView">
+    <div class="stats-bar" id="statsBar"></div>
+    <p class="count-line" id="countLine"></p>
+    <table class="lib-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th data-sort="titre">Titre</th>
+          <th data-sort="style">Style</th>
+          <th data-sort="niveau">Niveau</th>
+          <th data-sort="duree">Durée</th>
+          <th data-sort="joue">Joué</th>
+          <th id="concertColHeader" style="display:none;">Concert</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="grid"></tbody>
+    </table>
+    <div class="empty" id="emptyState" style="display:none;">
+      <h3>Le pupitre est vide</h3>
+      <p>Ajoute ta première partition avec le bouton « Nouvelle partition » ci-dessus.</p>
+    </div>
+  </main>
+
+  <main id="concertView" style="display:none;">
+    <div class="concert-manager">
+      <select id="concertSelect"><option value="">— Choisir un concert —</option></select>
+      <input type="text" id="newConcertNom" placeholder="Nom du concert (ex. Concert de Noël)">
+      <input type="text" id="newConcertDate" placeholder="Date (ex. 12.2024)">
+      <button class="btn btn-brass btn-small" id="btnCreateConcert">+ Créer</button>
+      <button class="btn btn-ghost btn-small" id="btnDeleteConcert">Supprimer ce concert</button>
+    </div>
+    <p class="empty-concert" id="noConcertMsg">Crée un premier concert ci-dessus pour commencer à construire un programme.</p>
+    <div id="concertLayout" style="display:none; max-width:640px; margin:0 auto;">
+      <div class="concert-total">
+        <div class="concert-total-num" id="concertTotal">0:00</div>
+        <div class="concert-total-lbl">Durée totale du programme</div>
+      </div>
+      <p class="hint" style="text-align:center; margin-bottom:16px;">Va sur l'onglet « Bibliothèque » et coche les morceaux pour ce concert — ils apparaîtront ici.</p>
+      <h3 class="concert-heading">Programme (dans l'ordre)</h3>
+      <div id="concertOrdered"></div>
+      <p class="empty-concert" id="concertEmptyMsg">Coche des morceaux dans la bibliothèque pour construire ton programme.</p>
+    </div>
+  </main>
+
+  <footer class="note">
+    Toutes les données restent sur cet ordinateur — rien n'est envoyé sur internet.
+    Utilise <b>« Enregistrer »</b> pour sauvegarder ta bibliothèque dans un fichier, et <b>« Charger un fichier »</b> pour la retrouver la prochaine fois.
+    Garde ce fichier et ton dossier de PDF au même endroit (clé USB ou dossier cloud).
+  </footer>
+
+  <div class="overlay" id="overlay">
+    <div class="panel">
+      <h2 id="panelTitle">Nouvelle partition</h2>
+      <p class="hint">Le chemin du PDF est relatif à l'emplacement de cette page — par ex. <code>PDF/marche.pdf</code>.</p>
+
+      <div class="field">
+        <label>Titre du morceau</label>
+        <input type="text" id="fTitre" placeholder="Ex. Marche Impériale">
+      </div>
+      <div class="two-col">
+        <div class="field">
+          <label>Compositeur</label>
+          <input type="text" id="fCompositeur" placeholder="Ex. J.P. Sousa">
+        </div>
+        <div class="field">
+          <label>Arrangeur</label>
+          <input type="text" id="fArrangeur" placeholder="Ex. P. Graham">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Style</label>
+        <div class="choice-row" id="styleChoices"></div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label>Niveau de difficulté</label>
+          <div class="level-row" id="levelChoices"></div>
+          <div id="levelWord" style="font-size:11.5px; color: var(--text-mute); margin-top:6px;"></div>
+        </div>
+        <div class="field">
+          <label>Durée</label>
+          <input type="text" id="fDuree" placeholder="Ex. 3:45">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Dates jouées</label>
+        <div class="dates-input-row">
+          <input type="text" id="fDateInput" placeholder="Ex. 12/2024">
+          <button class="btn btn-ghost btn-small" id="btnAddDate">Ajouter</button>
+        </div>
+        <div class="chips" id="dateChips"></div>
+      </div>
+
+      <div class="field">
+        <label>Partition pupitre (chemin relatif, PDF)</label>
+        <input type="text" id="fPdf" placeholder="Ex. PDF/marche_imperiale.pdf">
+      </div>
+
+      <div class="field">
+        <label>Partition de direction (chemin relatif, PDF)</label>
+        <input type="text" id="fPdfDirection" placeholder="Ex. PDF/marche_imperiale_direction.pdf">
+      </div>
+
+      <div class="field">
+        <label>Enregistrement audio (chemin relatif, MP3)</label>
+        <input type="text" id="fAudio" placeholder="Ex. MP3/marche_imperiale.mp3">
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="btnCancel">Annuler</button>
+        <button class="btn btn-brass" id="btnSave">Enregistrer la partition</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="pdfViewerOverlay">
+    <div class="panel" style="max-width:900px; height:88vh; display:flex; flex-direction:column; padding:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <h2 id="pdfViewerTitle" style="font-size:16px;">Partition</h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <a id="pdfViewerOpenNew" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-small">Ouvrir dans un onglet</a>
+          <button class="btn btn-ghost btn-small" id="btnClosePdfViewer">Fermer</button>
+        </div>
+      </div>
+      <iframe id="pdfViewerFrame" style="flex:1; width:100%; border:1px solid var(--parchment-line); border-radius:6px; background:#fff;"></iframe>
+    </div>
+  </div>
+
+  <div class="overlay" id="helpOverlay">
+    <div class="panel" style="max-width:640px;">
+      <h2>Comment fonctionne cette bibliothèque</h2>
+      <p class="hint">Un aide-mémoire rapide — ferme cette fenêtre et reviens-y quand tu veux.</p>
+
+      <div style="font-size:13.5px; line-height:1.7; color:var(--text-dark);">
+
+        <p><b>1. Où ranger tes fichiers</b><br>
+        Mets cette page HTML, ton fichier de sauvegarde <code>.json</code>, et un dossier <code>PDF</code> (et <code>MP3</code> si tu as des enregistrements) <b>tous au même endroit</b> — sur une clé USB ou dans un dossier cloud. Les chemins que tu tapes dans les fiches sont juste le <b>nom du fichier</b>, sans dossier devant, sauf s'il est rangé dans un sous-dossier (ex. <code>PDF/marche.pdf</code>).</p>
+
+        <p><b>2. À chaque fois que tu ouvres la page</b><br>
+        Clique sur <b>« Charger un fichier »</b> et choisis ton dernier <code>.json</code> enregistré — sinon tu repars d'une bibliothèque vide. La page ne s'en souvient pas toute seule, c'est une limite normale des navigateurs.</p>
+
+        <p><b>3. Après chaque modification</b><br>
+        Le bouton <b>« Enregistrer »</b> s'allume en orange dès que tu as fait un changement non sauvegardé. Clique dessus pour retélécharger ton <code>.json</code> à jour. Range-le ensuite au même endroit que les autres fichiers (remplace l'ancien).</p>
+
+        <p><b>4. Ajouter une partition</b><br>
+        Bouton <b>« + Nouvelle partition »</b> : remplis titre, compositeur, style (cliquable), niveau (cliquable), durée, dates jouées, et les chemins vers les fichiers PDF/MP3 correspondants.</p>
+
+        <p><b>5. Ouvrir un PDF</b><br>
+        Clique sur « Partition pupitre » ou « Partition de direction » sur une carte : le PDF s'affiche directement dans une fenêtre, sans jamais recharger la page — donc la musique en cours ne s'arrête pas.</p>
+
+        <p><b>6. Programme de concert</b><br>
+        Onglet « Programme de concert » : crée un concert (nom + date), puis retourne sur « Bibliothèque », choisis ce concert dans le menu « Concert actif », et coche les morceaux voulus sur leurs cartes. L'ordre et le temps total se calculent automatiquement dans l'onglet concert (réorganisable avec les flèches ↑↓).</p>
+
+        <p><b>7. En cas de souci</b><br>
+        Le message le plus courant est « Fichier introuvable » : ça veut dire que le nom tapé ne correspond pas exactement au vrai nom du fichier (majuscules, accents, espaces). Vérifie aussi qu'il n'y a pas de chemin complet collé par erreur (ex. depuis un Mac : <code>/Volumes/...</code>) — seul le nom du fichier doit rester.</p>
+
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn btn-brass" id="btnCloseHelp">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const STYLES = ["Marche","Ouverture","Concert","Pop","Noël","Hymne","Cortège","Choral","Film","Autre"];
+  const NIVEAU_LABELS = { 1: "Très facile", 2: "Facile", 3: "Moyen", 4: "Difficile", 5: "Très difficile" };
+
+  let pieces = [
+    {
+      id: "exemple-1",
+      titre: "Marche Impériale",
+      compositeur: "J.P. Sousa",
+      arrangeur: "P. Graham",
+      style: "Marche",
+      niveau: 3,
+      dates: ["12/2023", "06/2024"],
+      pdf: "PDF/marche_imperiale.pdf"
+    }
+  ];
+
+  let editingId = null;
+  let currentStyle = "";
+  let currentLevel = 0;
+  let currentDates = [];
+  let hasUnsavedChanges = false;
+  let expandedId = null;
+  let sortKey = null;
+  let sortDir = 1;
+
+  function sortValue(p, key){
+    if(key === 'joue') return (p.dates || []).length;
+    if(key === 'niveau') return p.niveau || 0;
+    if(key === 'duree') return parseDuree(p.duree);
+    return (p[key] || '').toString().toLowerCase();
+  }
+
+  function markUnsaved(){
+    hasUnsavedChanges = true;
+    const btn = document.getElementById('btnExport');
+    if(btn){ btn.classList.add('btn-unsaved'); btn.textContent = '● Enregistrer'; }
+  }
+  function markSaved(){
+    hasUnsavedChanges = false;
+    const btn = document.getElementById('btnExport');
+    if(btn){ btn.classList.remove('btn-unsaved'); btn.textContent = 'Enregistrer'; }
+  }
+  let concerts = [];
+  let currentConcertId = null;
+
+  function getCurrentConcert(){
+    return concerts.find(c => c.id === currentConcertId) || null;
+  }
+
+  function parseDuree(str){
+    if(!str) return 0;
+    const parts = str.trim().split(':').map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+    if(parts.length === 0) return 0;
+    if(parts.length === 1) return parts[0];
+    if(parts.length === 2) return parts[0]*60 + parts[1];
+    return parts[0]*3600 + parts[1]*60 + parts[2];
+  }
+  function formatDuree(totalSeconds){
+    const h = Math.floor(totalSeconds/3600);
+    const m = Math.floor((totalSeconds%3600)/60);
+    const s = totalSeconds%60;
+    if(h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  window.addEventListener('beforeunload', (e) => {
+    if(hasUnsavedChanges){
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  const grid = document.getElementById('grid');
+  const emptyState = document.getElementById('emptyState');
+  const countLine = document.getElementById('countLine');
+  const search = document.getElementById('search');
+  const filterStyle = document.getElementById('filterStyle');
+  const filterNiveau = document.getElementById('filterNiveau');
+  const concertActiveSelect = document.getElementById('concertActiveSelect');
+  const concertSelect = document.getElementById('concertSelect');
+
+  function refreshConcertSelectors(){
+    const optionsHtml = concerts.map(c =>
+      `<option value="${c.id}">${escapeHtml(c.nom)}${c.date ? ' — ' + escapeHtml(c.date) : ''}</option>`
+    ).join('');
+    concertActiveSelect.innerHTML = '<option value="">Aucun concert actif</option>' + optionsHtml;
+    concertActiveSelect.value = currentConcertId || '';
+    concertSelect.innerHTML = '<option value="">— Choisir un concert —</option>' + optionsHtml;
+    concertSelect.value = currentConcertId || '';
+    document.getElementById('concertColHeader').style.display = currentConcertId ? '' : 'none';
+  }
+  concertActiveSelect.addEventListener('change', () => {
+    currentConcertId = concertActiveSelect.value || null;
+    render();
+  });
+  concertSelect.addEventListener('change', () => {
+    currentConcertId = concertSelect.value || null;
+    refreshConcertSelectors();
+    renderConcertView();
+    render();
+  });
+  document.getElementById('btnNewConcertQuick').addEventListener('click', () => {
+    document.getElementById('tabConcert').click();
+    document.getElementById('newConcertNom').focus();
+  });
+  document.getElementById('btnCreateConcert').addEventListener('click', () => {
+    const nomInput = document.getElementById('newConcertNom');
+    const dateInput = document.getElementById('newConcertDate');
+    const nom = nomInput.value.trim();
+    if(!nom){ alert('Donne un nom au concert.'); return; }
+    const c = { id: 'c-' + Date.now(), nom, date: dateInput.value.trim(), pieceIds: [] };
+    concerts.push(c);
+    currentConcertId = c.id;
+    nomInput.value = ''; dateInput.value = '';
+    markUnsaved();
+    refreshConcertSelectors();
+    renderConcertView();
+    render();
+  });
+  document.getElementById('btnDeleteConcert').addEventListener('click', () => {
+    const cc = getCurrentConcert();
+    if(!cc) return;
+    if(confirm(`Supprimer le concert « ${cc.nom} » ? Le programme sera perdu, pas les partitions.`)){
+      concerts = concerts.filter(c => c.id !== cc.id);
+      currentConcertId = null;
+      markUnsaved();
+      refreshConcertSelectors();
+      renderConcertView();
+      render();
+    }
+  });
+
+  // populate filter style options
+  STYLES.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    filterStyle.appendChild(o);
+  });
+
+  function escapeHtml(str){
+    return (str || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  document.querySelectorAll('th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sort;
+      if(sortKey === key){ sortDir = -sortDir; } else { sortKey = key; sortDir = 1; }
+      document.querySelectorAll('th[data-sort]').forEach(t => t.classList.remove('sorted'));
+      th.classList.add('sorted');
+      render();
+    });
+  });
+
+  function render(){
+    renderStats();
+    refreshConcertSelectors();
+    const q = search.value.trim().toLowerCase();
+    const styleF = filterStyle.value;
+    const niveauF = filterNiveau.value;
+    const cc = getCurrentConcert();
+
+    let filtered = pieces.filter(p => {
+      const matchQ = !q || (p.titre + " " + p.compositeur + " " + p.arrangeur).toLowerCase().includes(q);
+      const matchStyle = !styleF || p.style === styleF;
+      const matchNiveau = !niveauF || String(p.niveau) === niveauF;
+      return matchQ && matchStyle && matchNiveau;
+    });
+
+    if(sortKey){
+      filtered = filtered.slice().sort((a,b) => {
+        const va = sortValue(a, sortKey), vb = sortValue(b, sortKey);
+        if(va < vb) return -1 * sortDir;
+        if(va > vb) return 1 * sortDir;
+        return 0;
+      });
+    }
+
+    countLine.textContent = filtered.length + (filtered.length > 1 ? " partitions" : " partition");
+    grid.innerHTML = "";
+
+    if(filtered.length === 0){
+      emptyState.style.display = "block";
+      emptyState.querySelector('h3').textContent = pieces.length === 0 ? "Le pupitre est vide" : "Aucun résultat";
+      emptyState.querySelector('p').textContent = pieces.length === 0
+        ? "Ajoute ta première partition avec le bouton « Nouvelle partition » ci-dessus."
+        : "Essaie une autre recherche ou d'autres filtres.";
+      return;
+    }
+    emptyState.style.display = "none";
+
+    filtered.forEach(p => {
+      const inConcert = cc ? cc.pieceIds.includes(p.id) : false;
+      const niveauLabel = p.niveau ? NIVEAU_LABELS[p.niveau] : '—';
+      const niveauClass = p.niveau ? 'n' + p.niveau : '';
+      const playedCount = (p.dates || []).length;
+      const peopleLine = [
+        p.compositeur ? `<b>${escapeHtml(p.compositeur)}</b>` : null,
+        p.arrangeur ? `arr. ${escapeHtml(p.arrangeur)}` : null
+      ].filter(Boolean).join(' &middot; ') || 'Compositeur inconnu';
+
+      const tr = document.createElement('tr');
+      tr.className = 'main-row';
+      tr.innerHTML = `
+        <td style="width:18px; color:var(--text-mute);">${expandedId === p.id ? '▾' : '▸'}</td>
+        <td class="title-cell">${escapeHtml(p.titre || 'Sans titre')}<div class="sub-cell">${peopleLine}</div></td>
+        <td><span class="pill">${escapeHtml(p.style || '?')}</span></td>
+        <td><span class="niveau-tag ${niveauClass}">${escapeHtml(niveauLabel)}</span></td>
+        <td>${p.duree ? escapeHtml(p.duree) : '—'}</td>
+        <td class="played-badge">${playedCount > 0 ? '× ' + playedCount : '—'}</td>
+        <td style="display:${cc ? '' : 'none'};" class="check-cell">
+          <input type="checkbox" data-concert-toggle="${p.id}" ${inConcert ? 'checked' : ''} ${cc ? '' : 'disabled'} onclick="event.stopPropagation()">
+        </td>
+        <td class="row-actions">
+          <button class="icon-btn" data-edit="${p.id}">Modifier</button>
+          <button class="icon-btn" data-dup="${p.id}">Dupliquer</button>
+          <button class="icon-btn" data-del="${p.id}">Supprimer</button>
+        </td>
+      `;
+      tr.addEventListener('click', (e) => {
+        if(e.target.closest('button') || e.target.closest('input')) return;
+        expandedId = expandedId === p.id ? null : p.id;
+        render();
+      });
+      grid.appendChild(tr);
+
+      if(expandedId === p.id){
+        const datesHtml = (p.dates && p.dates.length)
+          ? p.dates.map(d => `<span class="date-chip">${escapeHtml(d)}</span>`).join(' ')
+          : `<span style="color:#B9AF9C; font-size:12px;">pas encore jouée</span>`;
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'detail-row';
+        detailTr.innerHTML = `
+          <td colspan="8">
+            <div class="detail-grid">
+              <div class="detail-block">
+                <h4>Dates jouées</h4>
+                <div class="dates-line">${datesHtml}</div>
+                ${p.audio ? `<h4 style="margin-top:12px;">Écouter</h4><audio controls preload="none" style="width:100%; height:32px;" src="${escapeHtml(p.audio)}"></audio>` : ''}
+              </div>
+              <div class="detail-block">
+                <h4>Partitions</h4>
+                ${p.pdf
+                  ? `<button class="link-btn" data-viewpdf="${escapeHtml(p.pdf)}" data-viewtitle="${escapeHtml(p.titre)} — Partition pupitre">Partition pupitre →</button>`
+                  : `<span class="pdf-link disabled">Pupitre non lié</span>`}
+                ${p.pdfDirection
+                  ? `<button class="link-btn" data-viewpdf="${escapeHtml(p.pdfDirection)}" data-viewtitle="${escapeHtml(p.titre)} — Partition de direction">Partition de direction →</button>`
+                  : ''}
+              </div>
+            </div>
+          </td>
+        `;
+        grid.appendChild(detailTr);
+      }
+    });
+
+    grid.querySelectorAll('[data-edit]').forEach(b => b.addEventListener('click', () => openPanel(b.dataset.edit)));
+    grid.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+      if(confirm('Supprimer cette partition de la bibliothèque ?')){
+        pieces = pieces.filter(p => p.id !== b.dataset.del);
+        concerts.forEach(c => { c.pieceIds = c.pieceIds.filter(id => id !== b.dataset.del); });
+        markUnsaved();
+        render();
+      }
+    }));
+    grid.querySelectorAll('[data-dup]').forEach(b => b.addEventListener('click', () => {
+      const original = pieces.find(p => p.id === b.dataset.dup);
+      if(!original) return;
+      const copy = Object.assign({}, original, {
+        id: 'p-' + Date.now(),
+        titre: original.titre + ' (copie)',
+        dates: []
+      });
+      pieces.push(copy);
+      markUnsaved();
+      render();
+    }));
+    grid.querySelectorAll('[data-concert-toggle]').forEach(cb => cb.addEventListener('change', () => {
+      const cc2 = getCurrentConcert();
+      if(!cc2) return;
+      const id = cb.dataset.concertToggle;
+      if(cb.checked){ if(!cc2.pieceIds.includes(id)) cc2.pieceIds.push(id); }
+      else { cc2.pieceIds = cc2.pieceIds.filter(x => x !== id); }
+      markUnsaved();
+    }));
+    grid.querySelectorAll('[data-viewpdf]').forEach(b => b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openPdfViewer(b.dataset.viewpdf, b.dataset.viewtitle);
+    }));
+  }
+
+  function openPdfViewer(path, title){
+    document.getElementById('pdfViewerFrame').src = path;
+    document.getElementById('pdfViewerTitle').textContent = title || 'Partition';
+    document.getElementById('pdfViewerOpenNew').href = path;
+    document.getElementById('pdfViewerOverlay').classList.add('open');
+  }
+  document.getElementById('btnClosePdfViewer').addEventListener('click', () => {
+    document.getElementById('pdfViewerOverlay').classList.remove('open');
+    document.getElementById('pdfViewerFrame').src = '';
+  });
+  document.getElementById('pdfViewerOverlay').addEventListener('click', e => {
+    if(e.target.id === 'pdfViewerOverlay'){
+      e.target.classList.remove('open');
+      document.getElementById('pdfViewerFrame').src = '';
+    }
+  });
+
+  function renderStats(){
+    const statsBar = document.getElementById('statsBar');
+    if(pieces.length === 0){ statsBar.innerHTML = ''; return; }
+    const total = pieces.length;
+    const withNiveau = pieces.filter(p => p.niveau);
+    const avgNiveau = withNiveau.length ? (withNiveau.reduce((s,p)=>s+Number(p.niveau),0) / withNiveau.length).toFixed(1) : '—';
+    const styleCounts = {};
+    pieces.forEach(p => { if(p.style) styleCounts[p.style] = (styleCounts[p.style]||0)+1; });
+    const topStyle = Object.entries(styleCounts).sort((a,b)=>b[1]-a[1])[0];
+    const withPdf = pieces.filter(p => p.pdf).length;
+    const totalSeconds = pieces.reduce((s,p) => s + parseDuree(p.duree), 0);
+    const totalDureeLabel = totalSeconds > 0 ? formatDuree(totalSeconds) : '—';
+
+    statsBar.innerHTML = `
+      <div class="stat-chip"><div class="num">${total}</div><div class="lbl">Partitions</div></div>
+      <div class="stat-chip"><div class="num">${avgNiveau}</div><div class="lbl">Niveau moyen</div></div>
+      <div class="stat-chip"><div class="num">${topStyle ? escapeHtml(topStyle[0]) : '—'}</div><div class="lbl">Style le plus fréquent</div></div>
+      <div class="stat-chip"><div class="num">${withPdf}/${total}</div><div class="lbl">Avec PDF lié</div></div>
+      <div class="stat-chip"><div class="num">${totalDureeLabel}</div><div class="lbl">Durée totale</div></div>
+    `;
+  }
+
+  search.addEventListener('input', render);
+  filterStyle.addEventListener('change', render);
+  filterNiveau.addEventListener('change', render);
+
+  // ---------- PANEL ----------
+  const overlay = document.getElementById('overlay');
+  const styleChoices = document.getElementById('styleChoices');
+  const levelChoices = document.getElementById('levelChoices');
+  const dateChips = document.getElementById('dateChips');
+
+  STYLES.forEach(s => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'choice'; b.textContent = s;
+    b.addEventListener('click', () => { currentStyle = s; renderChoices(); });
+    styleChoices.appendChild(b);
+  });
+  [1,2,3,4,5].forEach(n => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'level-dot'; b.textContent = n;
+    b.addEventListener('click', () => { currentLevel = n; renderChoices(); });
+    levelChoices.appendChild(b);
+  });
+
+  function renderChoices(){
+    styleChoices.querySelectorAll('.choice').forEach(b => b.classList.toggle('sel', b.textContent === currentStyle));
+    levelChoices.querySelectorAll('.level-dot').forEach(b => b.classList.toggle('sel', Number(b.textContent) === currentLevel));
+    document.getElementById('levelWord').textContent = currentLevel ? NIVEAU_LABELS[currentLevel] : '';
+    dateChips.innerHTML = currentDates.map((d,i) => `<span class="chip">${escapeHtml(d)} <button data-i="${i}">×</button></span>`).join('');
+    dateChips.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+      currentDates.splice(Number(btn.dataset.i), 1);
+      renderChoices();
+    }));
+  }
+
+  document.getElementById('btnAddDate').addEventListener('click', () => {
+    const inp = document.getElementById('fDateInput');
+    if(inp.value.trim()){ currentDates.push(inp.value.trim()); inp.value=''; renderChoices(); }
+  });
+  document.getElementById('fDateInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('btnAddDate').click(); }
+  });
+
+  function openPanel(id){
+    editingId = id || null;
+    const p = id ? pieces.find(x => x.id === id) : null;
+    document.getElementById('panelTitle').textContent = p ? 'Modifier la partition' : 'Nouvelle partition';
+    document.getElementById('fTitre').value = p ? p.titre : '';
+    document.getElementById('fCompositeur').value = p ? p.compositeur : '';
+    document.getElementById('fArrangeur').value = p ? p.arrangeur : '';
+    document.getElementById('fPdf').value = p ? p.pdf : '';
+    document.getElementById('fPdfDirection').value = p ? (p.pdfDirection || '') : '';
+    document.getElementById('fAudio').value = p ? (p.audio || '') : '';
+    document.getElementById('fDuree').value = p ? (p.duree || '') : '';
+    currentStyle = p ? p.style : '';
+    currentLevel = p ? p.niveau : 0;
+    currentDates = p ? [...(p.dates||[])] : [];
+    renderChoices();
+    overlay.classList.add('open');
+    document.getElementById('fTitre').focus();
+  }
+  function closePanel(){ overlay.classList.remove('open'); editingId = null; }
+
+  document.getElementById('btnAdd').addEventListener('click', () => openPanel(null));
+  document.getElementById('btnHelp').addEventListener('click', () => document.getElementById('helpOverlay').classList.add('open'));
+  document.getElementById('btnCloseHelp').addEventListener('click', () => document.getElementById('helpOverlay').classList.remove('open'));
+  document.getElementById('helpOverlay').addEventListener('click', e => { if(e.target.id === 'helpOverlay') e.target.classList.remove('open'); });
+  document.getElementById('btnCancel').addEventListener('click', closePanel);
+  overlay.addEventListener('click', e => { if(e.target === overlay) closePanel(); });
+
+  document.getElementById('btnSave').addEventListener('click', () => {
+    const titre = document.getElementById('fTitre').value.trim();
+    if(!titre){ alert('Donne au moins un titre à la partition.'); return; }
+    const data = {
+      id: editingId || ('p-' + Date.now()),
+      titre,
+      compositeur: document.getElementById('fCompositeur').value.trim(),
+      arrangeur: document.getElementById('fArrangeur').value.trim(),
+      style: currentStyle,
+      niveau: currentLevel,
+      dates: currentDates,
+      pdf: document.getElementById('fPdf').value.trim(),
+      pdfDirection: document.getElementById('fPdfDirection').value.trim(),
+      audio: document.getElementById('fAudio').value.trim(),
+      duree: document.getElementById('fDuree').value.trim()
+    };
+    if(editingId){
+      pieces = pieces.map(p => p.id === editingId ? data : p);
+    } else {
+      pieces.push(data);
+    }
+    markUnsaved();
+    closePanel();
+    render();
+  });
+
+  // ---------- EXPORT / IMPORT ----------
+  document.getElementById('btnExport').addEventListener('click', () => {
+    const payload = { pieces, concerts };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bibliotheque-partitions.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    markSaved();
+  });
+
+  document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileInput').click());
+  document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try{
+        const parsed = JSON.parse(evt.target.result);
+        if(Array.isArray(parsed)){
+          pieces = parsed;
+          concerts = [];
+          currentConcertId = null;
+          markSaved();
+          render();
+        } else if(parsed && Array.isArray(parsed.pieces)){
+          pieces = parsed.pieces;
+          concerts = Array.isArray(parsed.concerts) ? parsed.concerts : [];
+          currentConcertId = null;
+          markSaved();
+          render();
+        } else {
+          alert("Ce fichier ne contient pas une bibliothèque valide.");
+        }
+      }catch(err){
+        alert("Impossible de lire ce fichier (JSON invalide).");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+
+  document.getElementById('dismissReminder').addEventListener('click', () => {
+    document.getElementById('loadReminder').closest('.toolbar').style.display = 'none';
+  });
+
+  // ---------- ONGLETS ----------
+  const tabLibrary = document.getElementById('tabLibrary');
+  const tabConcert = document.getElementById('tabConcert');
+  const libraryToolbar = document.getElementById('libraryToolbar');
+  const libraryView = document.getElementById('libraryView');
+  const concertView = document.getElementById('concertView');
+
+  tabLibrary.addEventListener('click', () => {
+    tabLibrary.classList.add('active'); tabConcert.classList.remove('active');
+    libraryToolbar.style.display = 'flex'; libraryView.style.display = 'block';
+    concertView.style.display = 'none';
+    render();
+  });
+  tabConcert.addEventListener('click', () => {
+    tabConcert.classList.add('active'); tabLibrary.classList.remove('active');
+    libraryToolbar.style.display = 'none'; libraryView.style.display = 'none';
+    concertView.style.display = 'block';
+    renderConcertView();
+  });
+
+  // ---------- PROGRAMME DE CONCERT ----------
+  function renderConcertView(){
+    const ordered = document.getElementById('concertOrdered');
+    const emptyMsg = document.getElementById('concertEmptyMsg');
+    const totalEl = document.getElementById('concertTotal');
+    const noConcertMsg = document.getElementById('noConcertMsg');
+    const concertLayout = document.getElementById('concertLayout');
+    const btnDeleteConcert = document.getElementById('btnDeleteConcert');
+
+    const cc = getCurrentConcert();
+    if(!cc){
+      noConcertMsg.style.display = concerts.length === 0 ? 'block' : 'none';
+      noConcertMsg.textContent = concerts.length === 0
+        ? 'Crée un premier concert ci-dessus pour commencer à construire un programme.'
+        : 'Choisis un concert dans la liste ci-dessus.';
+      noConcertMsg.style.display = 'block';
+      concertLayout.style.display = 'none';
+      btnDeleteConcert.style.display = 'none';
+      return;
+    }
+    noConcertMsg.style.display = 'none';
+    concertLayout.style.display = 'block';
+    btnDeleteConcert.style.display = 'inline-block';
+
+    let totalSeconds = 0;
+    if(cc.pieceIds.length === 0){
+      ordered.innerHTML = '';
+      emptyMsg.style.display = 'block';
+    } else {
+      emptyMsg.style.display = 'none';
+      ordered.innerHTML = cc.pieceIds.map((id, i) => {
+        const p = pieces.find(x => x.id === id);
+        if(!p) return '';
+        totalSeconds += parseDuree(p.duree);
+        return `
+          <div class="ord-row">
+            <span class="onum">${i+1}.</span>
+            <span class="otitle">${escapeHtml(p.titre)}</span>
+            <span class="odur">${p.duree ? escapeHtml(p.duree) : '—'}</span>
+            <button class="ord-btn" data-up="${id}" ${i===0 ? 'disabled style="opacity:.25;"' : ''}>↑</button>
+            <button class="ord-btn" data-down="${id}" ${i===cc.pieceIds.length-1 ? 'disabled style="opacity:.25;"' : ''}>↓</button>
+            <button class="ord-btn remove" data-remove="${id}">×</button>
+          </div>`;
+      }).join('');
+
+      ordered.querySelectorAll('[data-up]').forEach(b => b.addEventListener('click', () => {
+        const i = cc.pieceIds.indexOf(b.dataset.up);
+        if(i > 0){ [cc.pieceIds[i-1], cc.pieceIds[i]] = [cc.pieceIds[i], cc.pieceIds[i-1]]; markUnsaved(); renderConcertView(); }
+      }));
+      ordered.querySelectorAll('[data-down]').forEach(b => b.addEventListener('click', () => {
+        const i = cc.pieceIds.indexOf(b.dataset.down);
+        if(i < cc.pieceIds.length-1){ [cc.pieceIds[i+1], cc.pieceIds[i]] = [cc.pieceIds[i], cc.pieceIds[i+1]]; markUnsaved(); renderConcertView(); }
+      }));
+      ordered.querySelectorAll('[data-remove]').forEach(b => b.addEventListener('click', () => {
+        cc.pieceIds = cc.pieceIds.filter(x => x !== b.dataset.remove);
+        markUnsaved();
+        renderConcertView();
+      }));
+    }
+    totalEl.textContent = formatDuree(totalSeconds);
+  }
+
+  render();
+</script>
+</body>
+</html>
